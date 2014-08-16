@@ -1,3 +1,5 @@
+/* overwritable buffer version */
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -46,15 +48,13 @@ int isFull(circBuffer *cb)
 }
 
 void push(circBuffer *cb, int data)
-{
-    if (isFull(cb)) {
-        printf("circ buffer is already full: cannot push\n");
-        return;
-    } else {
-        ((cb->elems)[cb->head]).data   = data;
-        cb->head                    = (cb->head + 1) % cb->size;
-        return;
-    }
+{    
+    ((cb->elems)[cb->head]).data   = data;
+    cb->head                    = (cb->head + 1) % cb->size;
+    if (cb->head == cb->tail) {
+        cb->tail = (cb->tail + 1) % cb->size;
+    } 
+    return;
 }
 
 int pop(circBuffer *cb)
