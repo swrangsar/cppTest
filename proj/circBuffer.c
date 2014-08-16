@@ -7,8 +7,8 @@ typedef struct node {
 
 typedef struct circBuffer {
     node *begin;
-    node *head;
-    node *tail;
+    int head;
+    int tail;
     int size;
 } circBuffer;
 
@@ -26,8 +26,8 @@ circBuffer *makeCircBuffer(int size)
         printf("ERROR: could not allocate array for the circ buffer!\n");
         exit(EXIT_FAILURE);
     }
-    cb->head    = cb->begin;
-    cb->tail    = cb->begin;
+    cb->head    = 0;
+    cb->tail    = 0;
     cb->size    = sz;
     return cb;
 }
@@ -39,10 +39,10 @@ int isEmpty(circBuffer *cb)
 
 int isFull(circBuffer *cb)
 {
-    node *ph = cb->head;
-    node *pt = cb->tail;
     node *pb = cb->begin;
-    return (pt-pb) == ((ph - pb + 1)%(cb->size))?1:0;
+    int h = cb->head;
+    int t = cb->tail;
+    return ((&pb[t] == &pb[(h+1)% cb->size])?1:0);
 }
 
 void push(circBuffer *cb, int data)
@@ -51,8 +51,8 @@ void push(circBuffer *cb, int data)
         printf("circ buffer is already full: cannot push\n");
         return;
     } else {
-        cb->head->data  = data;
-        cb->head        = &(cb->begin)[(cb->head - cb->begin + 1)% cb->size];
+        ((cb->begin)[cb->head]).data   = data;
+        cb->head                    = (cb->head + 1) % cb->size;
         return;
     }
 }
@@ -63,9 +63,9 @@ int pop(circBuffer *cb)
         printf("circ buffer is empty: cannot pop!\n");
         exit(EXIT_FAILURE);
     } else {
-        int data        = cb->tail->data;
-        cb->tail->data  = 0;
-        cb->tail        = &(cb->begin)[(cb->tail - cb->begin +1) % cb->size];
+        int data        = ((cb->begin)[cb->tail]).data;
+        ((cb->begin)[cb->tail]).data  = 0;
+        cb->tail        = (cb->tail + 1) % cb->size;
         return data;
     }
 }
@@ -90,8 +90,8 @@ void showCircBuffer(circBuffer *cb)
         printf("%2d: %d,\n", i, ((cb->begin)[i]).data );
         i++;
     }
-    printf("head: %d ",((cb->begin)[(cb->head - cb->begin - 1 + sz) % sz]).data);
-    printf("tail: %d \n", cb->tail->data);
+    printf("head: %d ",((cb->begin)[(cb->head - 1 + sz) % sz]).data );
+    printf("tail: %d \n", ((cb->begin)[cb->tail]).data );
     printf("end of circ buf data.\n");
     return;
 }
